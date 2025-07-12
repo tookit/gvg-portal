@@ -21,9 +21,10 @@ import {
   X,
 } from 'lucide-react'
 import { getOrders } from '@/lib/api'
+import type { Order } from '@/types'
 
 const Orders: React.FC = () => {
-  const [orders, setOrders] = useState<any[]>([])
+  const [orders, setOrders] = useState<Order[]>([])
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
 
   useEffect(() => {

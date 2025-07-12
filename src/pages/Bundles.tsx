@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Plus, Eye, Edit, CheckCircle, X, Save, Package } from 'lucide-react'
+import type { Bundle, BundleFormData } from '@/types'
 
 // Mock API functions - replace with your actual API
 const getBundles = async () => {
@@ -55,44 +56,11 @@ const getBundles = async () => {
 }
 
 const addBundle = async (bundle: BundleFormData) => {
-  console.log('Adding bundle:', bundle)
   return bundle
 }
 
 const updateBundle = async (bundle: BundleFormData) => {
-  console.log('Updating bundle:', bundle)
   return bundle
-}
-
-interface Bundle {
-  id: number
-  name: string
-  items: number
-  assigned: boolean
-  budget: number
-  category?: 'Drivers' | 'Office' | 'Special Bundles'
-  description?: string
-  products?: Array<{
-    id: string
-    name: string
-    quantity: number
-    price: number
-  }>
-  isActive?: boolean
-}
-
-interface BundleFormData {
-  name: string
-  category: 'Drivers' | 'Office' | 'Special Bundles' | ''
-  description: string
-  budget: string
-  products: Array<{
-    id: string
-    name: string
-    quantity: number
-    price: number
-  }>
-  isActive: boolean
 }
 
 const BundleForm: React.FC<{

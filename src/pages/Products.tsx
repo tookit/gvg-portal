@@ -6,9 +6,10 @@ import { Badge } from '@/components/ui/badge'
 import { Search, Filter, Plus, ShoppingCart } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 import { getProducts } from '@/lib/api'
+import type { Product, SizeKey } from '@/types'
 
 const Products: React.FC = () => {
-  const [products, setProducts] = useState<any[]>([])
+  const [products, setProducts] = useState<Product[]>([])
   const { addItem } = useCart()
 
   useEffect(() => {
@@ -28,7 +29,7 @@ const Products: React.FC = () => {
 
   const handleStockChange = (
     productId: number,
-    size: string,
+    size: SizeKey,
     newStock: string
   ) => {
     const stockValue = parseInt(newStock) || 0
@@ -155,7 +156,7 @@ const Products: React.FC = () => {
                                   onChange={(e) =>
                                     handleStockChange(
                                       product.id,
-                                      size,
+                                      size as SizeKey,
                                       e.target.value
                                     )
                                   }

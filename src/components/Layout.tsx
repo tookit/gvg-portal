@@ -14,16 +14,7 @@ import {
 import { cn } from '@/lib/utils'
 import { useCart } from '@/contexts/CartContext'
 import CartDrawer from './CartDrawer'
-
-interface LayoutProps {
-  user: {
-    name: string
-    role: string
-    company: string
-    budget: number
-    spent: number
-  }
-}
+import type { LayoutProps } from '@/types'
 
 const Layout: React.FC<LayoutProps> = ({ user }) => {
   const location = useLocation()

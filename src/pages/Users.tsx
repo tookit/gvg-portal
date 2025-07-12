@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Search, Filter, Plus, MoreHorizontal } from 'lucide-react'
 import { getUsers } from '@/lib/api'
 import { users as mockUsers } from '@/lib/data'
@@ -21,9 +26,9 @@ const Users: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'Active':
-        return <Badge variant="outline">{status}</Badge>
+        return <Badge variant='outline'>{status}</Badge>
       case 'Inactive':
-        return <Badge variant="secondary">{status}</Badge>
+        return <Badge variant='secondary'>{status}</Badge>
       default:
         return <Badge>{status}</Badge>
     }
@@ -70,25 +75,35 @@ const Users: React.FC = () => {
                   <tr key={user.id} className='border-b hover:bg-muted/50'>
                     <td className='p-4'>
                       <div className='flex items-center space-x-3'>
-                        <img src={user.avatar} alt={user.name} className='w-10 h-10 rounded-full' />
+                        <img
+                          src={user.avatar}
+                          alt={user.name}
+                          className='w-10 h-10 rounded-full'
+                        />
                         <div>
                           <div className='font-medium'>{user.name}</div>
-                          <div className='text-sm text-muted-foreground'>{user.email}</div>
+                          <div className='text-sm text-muted-foreground'>
+                            {user.email}
+                          </div>
                         </div>
                       </div>
                     </td>
                     <td className='p-4'>{user.role}</td>
-                    <td className='p-4'>{getStatusBadge(user.status)}</td>
-                    <td className='p-4'>{new Date(user.lastLogin).toLocaleString()}</td>
+                    <td className='p-4'>{getStatusBadge(user.status || '')}</td>
+                    <td className='p-4'>
+                      {user.lastLogin
+                        ? new Date(user.lastLogin).toLocaleString()
+                        : '-'}
+                    </td>
                     <td className='p-4'>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
+                          <Button variant='ghost' className='h-8 w-8 p-0'>
+                            <span className='sr-only'>Open menu</span>
+                            <MoreHorizontal className='h-4 w-4' />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align='end'>
                           <DropdownMenuItem>Edit</DropdownMenuItem>
                           <DropdownMenuItem>View</DropdownMenuItem>
                           <DropdownMenuItem>Deactivate</DropdownMenuItem>

@@ -4,30 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { DollarSign, ShoppingCart, Package, BarChart3, Eye } from 'lucide-react'
-
-interface DashboardProps {
-  user: {
-    name: string
-    role: string
-    company: string
-    budget: number
-    spent: number
-  }
-  orders: Array<{
-    id: string
-    date: string
-    status: string
-    total: number
-    items: number
-  }>
-  bundles: Array<{
-    id: number
-    name: string
-    items: number
-    assigned: boolean
-    budget: number
-  }>
-}
+import type { DashboardProps } from '@/types'
 
 const Dashboard: React.FC<DashboardProps> = ({ user, orders, bundles }) => {
   const budgetPercentage = (user.spent / user.budget) * 100

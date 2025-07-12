@@ -9,23 +9,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Download, FileText, BarChart3, Package } from 'lucide-react'
-
-interface ReportsProps {
-  user: {
-    name: string
-    role: string
-    company: string
-    budget: number
-    spent: number
-  }
-  orders: Array<{
-    id: string
-    date: string
-    status: string
-    total: number
-    items: number
-  }>
-}
+import type { ReportsProps } from '@/types'
 
 const Reports: React.FC<ReportsProps> = ({ user, orders }) => {
   const budgetPercentage = (user.spent / user.budget) * 100

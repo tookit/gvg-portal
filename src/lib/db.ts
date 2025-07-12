@@ -1,24 +1,25 @@
 import { openDB } from 'idb'
 import type { DBSchema } from 'idb'
 import { users, products, orders, bundles } from './data'
+import type { User, Product, Order, Bundle } from '@/types'
 
 interface MyDB extends DBSchema {
   users: {
     key: number
-    value: (typeof users)[0]
+    value: User
     indexes: { role: string }
   }
   products: {
     key: number
-    value: (typeof products)[0]
+    value: Product
   }
   orders: {
     key: string
-    value: (typeof orders)[0]
+    value: Order
   }
   bundles: {
     key: number
-    value: (typeof bundles)[0]
+    value: Bundle
   }
 }
 

@@ -1,39 +1,23 @@
-import React from 'react'
+import { useEffect, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Search, Filter, Plus, ShoppingCart } from 'lucide-react'
-import { useState } from 'react'
 import { useCart } from '@/contexts/CartContext'
+import { getProducts } from '@/lib/api'
 
-type SizeKey =
-  | 'XS'
-  | 'S'
-  | 'M'
-  | 'L'
-  | 'XL'
-  | '2XL'
-  | '3XL' // Standard sizes
-  | `A${number}` // Pattern for A-sizes (A7, A11, etc.)
-
-type Sizes = Partial<Record<SizeKey, number>>
-
-interface ProductsProps {
-  products: Array<{
-    id: number
-    name: string
-    code: string
-    price: number
-    stock: number
-    sizes: Sizes
-    image?: string // Added image property
-  }>
-}
-
-const Products: React.FC<ProductsProps> = ({ products: initialProducts }) => {
-  const [products, setProducts] = useState(initialProducts)
+const Products: React.FC = () => {
+  const [products, setProducts] = useState<any[]>([])
   const { addItem } = useCart()
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const data = await getProducts()
+      setProducts(data)
+    }
+    fetchProducts()
+  }, [])
 
   const getSizeStockColor = (stock: number) => {
     if (stock === 0) return 'bg-red-200 border-red-300'

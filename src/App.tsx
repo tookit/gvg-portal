@@ -7,6 +7,7 @@ import Bundles from './pages/Bundles'
 import Products from './pages/Products'
 import Reports from './pages/Reports'
 import Checkout from './pages/Checkout'
+import Users from './pages/Users'
 import { CartProvider } from '@/contexts/CartContext'
 
 function App() {
@@ -121,14 +122,15 @@ function App() {
                 <Dashboard user={user} orders={orders} bundles={bundles} />
               }
             />
-            <Route path='orders' element={<Orders orders={orders} />} />
-            <Route path='bundles' element={<Bundles bundles={bundles} />} />
-            <Route path='products' element={<Products products={products} />} />
+            <Route path='orders' element={<Orders />} />
+            <Route path='bundles' element={<Bundles />} />
+            <Route path='products' element={<Products />} />
             <Route
               path='reports'
               element={<Reports user={user} orders={orders} />}
             />
             <Route path='checkout' element={<Checkout />} />
+            <Route path='users' element={<Users />} />
           </Route>
         </Routes>
       </BrowserRouter>

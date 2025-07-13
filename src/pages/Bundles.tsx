@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Plus, Package, AlertCircle, Loader2 } from 'lucide-react'
-import type { Bundle, BundleFormData } from '@/types'
+import type { Bundle } from '@/types'
 import {
   BundleForm,
   BundleViewDialog,
   BundleCard,
   useBundles,
 } from './bundles/index'
+import type { BundleFormValues } from './bundles/BundleForm'
 
 const Bundles: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false)
@@ -24,7 +25,7 @@ const Bundles: React.FC = () => {
     refreshBundles,
   } = useBundles()
 
-  const handleSaveBundle = async (data: BundleFormData) => {
+  const handleSaveBundle = async (data: BundleFormValues) => {
     try {
       if (selectedBundle) {
         await updateBundle(selectedBundle.id, data)

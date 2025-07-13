@@ -48,7 +48,7 @@ export interface Bundle {
   items: number
   assigned: boolean
   budget: number
-  category?: 'Drivers' | 'Office' | 'Special Bundles' | ''
+  category?: string
   description?: string
   products?: Array<{
     id: string
@@ -61,7 +61,7 @@ export interface Bundle {
 
 export interface BundleFormData {
   name: string
-  category: 'Drivers' | 'Office' | 'Special Bundles' | ''
+  category?: string
   description: string
   budget: number
   products: Array<{

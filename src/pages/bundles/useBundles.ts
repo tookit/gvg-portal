@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import type { Bundle, BundleFormData } from '@/types'
+import type { Bundle } from '@/types'
 import { getBundles, addBundle, updateBundle } from '@/lib/api'
+import type { BundleFormValues } from './BundleForm'
 
 export const useBundles = () => {
   const [bundles, setBundles] = useState<Bundle[]>([])
@@ -21,7 +22,7 @@ export const useBundles = () => {
     }
   }
 
-  const createBundle = async (bundleData: BundleFormData) => {
+  const createBundle = async (bundleData: BundleFormValues) => {
     try {
       setIsSaving(true)
       setError(null)
@@ -31,7 +32,10 @@ export const useBundles = () => {
         items: bundleData.products.length,
         assigned: false,
         budget: bundleData.budget || 0,
-        category: bundleData.category as 'Drivers' | 'Office' | 'Special Bundles',
+        category: bundleData.category as
+          | 'Drivers'
+          | 'Office'
+          | 'Special Bundles',
         description: bundleData.description,
         products: bundleData.products,
         isActive: bundleData.isActive,
@@ -46,7 +50,10 @@ export const useBundles = () => {
     }
   }
 
-  const updateBundleById = async (bundleId: number, bundleData: BundleFormData) => {
+  const updateBundleById = async (
+    bundleId: number,
+    bundleData: BundleFormValues
+  ) => {
     try {
       setIsSaving(true)
       setError(null)
@@ -56,7 +63,10 @@ export const useBundles = () => {
         items: bundleData.products.length,
         assigned: false,
         budget: bundleData.budget || 0,
-        category: bundleData.category as 'Drivers' | 'Office' | 'Special Bundles',
+        category: bundleData.category as
+          | 'Drivers'
+          | 'Office'
+          | 'Special Bundles',
         description: bundleData.description,
         products: bundleData.products,
         isActive: bundleData.isActive,

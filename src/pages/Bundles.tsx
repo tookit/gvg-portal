@@ -1,560 +1,52 @@
-import { useEffect, useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Plus, Eye, Edit, CheckCircle, X, Save, Package } from 'lucide-react'
+import { Plus, Package, AlertCircle, Loader2 } from 'lucide-react'
 import type { Bundle, BundleFormData } from '@/types'
-import { getBundles, addBundle, updateBundle } from '@/lib/api'
-
-const BundleForm: React.FC<{
-  isOpen: boolean
-  onClose: () => void
-  onSave: (data: BundleFormData) => void
-  bundle?: Bundle | null
-}> = ({ isOpen, onClose, onSave, bundle }) => {
-  const [formData, setFormData] = useState<BundleFormData>({
-    name: '',
-    category: '',
-    description: '',
-    budget: 0,
-    products: [],
-    isActive: true,
-  })
-
-  useEffect(() => {
-    if (bundle) {
-      setFormData({
-        name: bundle.name,
-        category: bundle.category || '',
-        description: bundle.description || '',
-        budget: bundle.budget,
-        products: bundle.products || [],
-        isActive: bundle.isActive ?? true,
-      })
-    } else {
-      setFormData({
-        name: '',
-        category: '',
-        description: '',
-        budget: 0,
-        products: [],
-        isActive: true,
-      })
-    }
-  }, [bundle])
-
-  const [newProduct, setNewProduct] = useState({
-    name: '',
-    quantity: 1,
-    price: 0,
-  })
-
-  const handleAddProduct = () => {
-    if (newProduct.name) {
-      setFormData((prev) => ({
-        ...prev,
-        products: [
-          ...prev.products,
-          {
-            id: Date.now().toString(),
-            ...newProduct,
-          },
-        ],
-      }))
-      setNewProduct({ name: '', quantity: 1, price: 0 })
-    }
-  }
-
-  const handleRemoveProduct = (id: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      products: prev.products.filter((p) => p.id !== id),
-    }))
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSave(formData)
-    onClose()
-  }
-
-  const totalProductCost = formData.products.reduce(
-    (sum, product) => sum + product.price * product.quantity,
-    0
-  )
-
-  if (!isOpen) return null
-
-  return (
-    <div className='fixed inset-0 bg-black bg-black/50 flex items-center justify-center z-50'>
-      <div className='bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto'>
-        <div className='flex items-center justify-between mb-6'>
-          <h3 className='text-xl font-bold'>
-            {bundle ? 'Edit' : 'Create'} Product Bundle
-          </h3>
-          <Button variant='ghost' size='sm' onClick={onClose}>
-            <X className='h-4 w-4' />
-          </Button>
-        </div>
-
-        <form onSubmit={handleSubmit} className='space-y-6'>
-          {/* Basic Information */}
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-            <div className='space-y-2'>
-              <Label htmlFor='bundleName'>Bundle Name</Label>
-              <Input
-                id='bundleName'
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, name: e.target.value }))
-                }
-                placeholder='Enter bundle name'
-                required
-              />
-            </div>
-            <div className='space-y-2'>
-              <Label htmlFor='category'>Category</Label>
-              <Select
-                value={formData.category}
-                onValueChange={(
-                  value: 'Drivers' | 'Office' | 'Special Bundles'
-                ) => setFormData((prev) => ({ ...prev, category: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder='Select category' />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value='Drivers'>Drivers</SelectItem>
-                  <SelectItem value='Office'>Office</SelectItem>
-                  <SelectItem value='Special Bundles'>
-                    Special Bundles
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className='space-y-2'>
-            <Label htmlFor='description'>Description</Label>
-            <Textarea
-              id='description'
-              value={formData.description}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  description: e.target.value,
-                }))
-              }
-              placeholder='Describe the bundle purpose and contents'
-              rows={3}
-            />
-          </div>
-
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-            <div className='space-y-2'>
-              <Label htmlFor='budget'>Budget Limit ($)</Label>
-              <Input
-                id='budget'
-                type='number'
-                value={formData.budget}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    budget: parseFloat(e.target.value) || 0,
-                  }))
-                }
-                placeholder='0.00'
-                min='0'
-                step='0.01'
-              />
-            </div>
-            <div className='flex items-center space-x-2 pt-6'>
-              <Checkbox
-                id='isActive'
-                checked={formData.isActive}
-                onCheckedChange={(checked) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    isActive: checked as boolean,
-                  }))
-                }
-              />
-              <Label htmlFor='isActive'>Active Bundle</Label>
-            </div>
-          </div>
-
-          {/* Products Section */}
-          <div className='space-y-4'>
-            <h4 className='text-lg font-semibold'>Bundle Products</h4>
-
-            {/* Add Product Form */}
-            <Card>
-              <CardHeader>
-                <CardTitle className='text-base'>Add Product</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
-                  <div className='md:col-span-2'>
-                    <Label htmlFor='productName'>Product Name</Label>
-                    <Input
-                      id='productName'
-                      value={newProduct.name}
-                      onChange={(e) =>
-                        setNewProduct((prev) => ({
-                          ...prev,
-                          name: e.target.value,
-                        }))
-                      }
-                      placeholder='Enter product name'
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor='quantity'>Quantity</Label>
-                    <Input
-                      id='quantity'
-                      type='number'
-                      value={newProduct.quantity}
-                      onChange={(e) =>
-                        setNewProduct((prev) => ({
-                          ...prev,
-                          quantity: parseInt(e.target.value) || 1,
-                        }))
-                      }
-                      min='1'
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor='price'>Price ($)</Label>
-                    <Input
-                      id='price'
-                      type='number'
-                      value={newProduct.price}
-                      onChange={(e) =>
-                        setNewProduct((prev) => ({
-                          ...prev,
-                          price: parseFloat(e.target.value) || 0,
-                        }))
-                      }
-                      min='0'
-                      step='0.01'
-                      placeholder='0.00'
-                    />
-                  </div>
-                </div>
-                <Button
-                  type='button'
-                  onClick={handleAddProduct}
-                  className='mt-4'
-                  disabled={!newProduct.name}
-                >
-                  <Plus className='h-4 w-4 mr-2' />
-                  Add Product
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Products List */}
-            {formData.products.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className='text-base'>Bundle Contents</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className='space-y-2'>
-                    {formData.products.map((product) => (
-                      <div
-                        key={product.id}
-                        className='flex items-center justify-between p-3 border rounded-lg'
-                      >
-                        <div className='flex-1'>
-                          <div className='font-medium'>{product.name}</div>
-                          <div className='text-sm text-muted-foreground'>
-                            Qty: {product.quantity} × $
-                            {product.price.toFixed(2)} = $
-                            {(product.quantity * product.price).toFixed(2)}
-                          </div>
-                        </div>
-                        <Button
-                          type='button'
-                          variant='ghost'
-                          size='sm'
-                          onClick={() => handleRemoveProduct(product.id)}
-                        >
-                          <X className='h-4 w-4' />
-                        </Button>
-                      </div>
-                    ))}
-                    <div className='border-t pt-2 mt-4'>
-                      <div className='flex justify-between items-center font-semibold'>
-                        <span>Total Cost:</span>
-                        <span>${totalProductCost.toFixed(2)}</span>
-                      </div>
-                      {formData.budget && Number(formData.budget) > 0 && (
-                        <div className='flex justify-between items-center text-sm text-muted-foreground'>
-                          <span>Budget Remaining:</span>
-                          <span
-                            className={
-                              Number(formData.budget) - totalProductCost < 0
-                                ? 'text-red-600'
-                                : 'text-green-600'
-                            }
-                          >
-                            $
-                            {(
-                              Number(formData.budget) - totalProductCost
-                            ).toFixed(2)}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Form Actions */}
-          <div className='flex items-center justify-end space-x-4 pt-6 border-t'>
-            <Button type='button' variant='outline' onClick={onClose}>
-              Cancel
-            </Button>
-            <Button
-              type='submit'
-              disabled={!formData.name || !formData.category}
-            >
-              <Save className='h-4 w-4 mr-2' />
-              {bundle ? 'Save Changes' : 'Create Bundle'}
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
-  )
-}
-
-const ViewBundleDialog: React.FC<{
-  bundle: Bundle | null
-  onClose: () => void
-  onEdit: (bundle: Bundle) => void
-}> = ({ bundle, onClose, onEdit }) => {
-  if (!bundle) return null
-
-  const totalCost =
-    bundle.products?.reduce(
-      (sum, product) => sum + product.price * product.quantity,
-      0
-    ) || 0
-
-  return (
-    <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50'>
-      <div className='bg-white rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto'>
-        <div className='flex items-center justify-between mb-6'>
-          <div className='flex items-center space-x-3'>
-            <Package className='h-6 w-6 text-blue-600' />
-            <h3 className='text-xl font-bold'>{bundle.name}</h3>
-          </div>
-          <Button variant='ghost' size='sm' onClick={onClose}>
-            <X className='h-4 w-4' />
-          </Button>
-        </div>
-
-        <div className='space-y-6'>
-          {/* Header Info */}
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-            <div className='space-y-3'>
-              <div className='flex items-center space-x-2'>
-                <Badge
-                  className={
-                    bundle.category === 'Drivers'
-                      ? 'bg-blue-100 text-blue-800'
-                      : bundle.category === 'Office'
-                      ? 'bg-purple-100 text-purple-800'
-                      : bundle.category === 'Special Bundles'
-                      ? 'bg-orange-100 text-orange-800'
-                      : 'bg-gray-100 text-gray-800'
-                  }
-                >
-                  {bundle.category}
-                </Badge>
-                {bundle.assigned && (
-                  <Badge className='bg-green-100 text-green-800'>
-                    <CheckCircle className='h-3 w-3 mr-1' />
-                    Assigned
-                  </Badge>
-                )}
-                <Badge variant={bundle.isActive ? 'default' : 'secondary'}>
-                  {bundle.isActive ? 'Active' : 'Inactive'}
-                </Badge>
-              </div>
-              <div className='text-sm text-gray-600'>
-                <p>{bundle.description}</p>
-              </div>
-            </div>
-            <div className='space-y-2'>
-              <div className='flex items-center justify-between p-3 bg-gray-50 rounded-lg'>
-                <span className='text-sm font-medium'>Budget Limit:</span>
-                <span className='font-semibold text-lg'>
-                  ${bundle.budget.toFixed(2)}
-                </span>
-              </div>
-              <div className='flex items-center justify-between p-3 bg-gray-50 rounded-lg'>
-                <span className='text-sm font-medium'>Total Cost:</span>
-                <span className='font-semibold text-lg'>
-                  ${totalCost.toFixed(2)}
-                </span>
-              </div>
-              <div className='flex items-center justify-between p-3 bg-gray-50 rounded-lg'>
-                <span className='text-sm font-medium'>Remaining:</span>
-                <span
-                  className={`font-semibold text-lg ${
-                    bundle.budget - totalCost < 0
-                      ? 'text-red-600'
-                      : 'text-green-600'
-                  }`}
-                >
-                  ${(bundle.budget - totalCost).toFixed(2)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Products List */}
-          <div>
-            <h4 className='text-lg font-semibold mb-3 flex items-center'>
-              <Package className='h-5 w-5 mr-2' />
-              Bundle Contents ({bundle.products?.length || 0} items)
-            </h4>
-            {bundle.products && bundle.products.length > 0 ? (
-              <div className='space-y-2'>
-                {bundle.products.map((product) => (
-                  <div
-                    key={product.id}
-                    className='flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50'
-                  >
-                    <div className='flex-1'>
-                      <div className='font-medium'>{product.name}</div>
-                      <div className='text-sm text-gray-600'>
-                        Quantity: {product.quantity} × $
-                        {product.price.toFixed(2)} each
-                      </div>
-                    </div>
-                    <div className='text-right'>
-                      <div className='font-semibold'>
-                        ${(product.quantity * product.price).toFixed(2)}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className='text-center py-8 text-gray-500'>
-                <Package className='h-12 w-12 mx-auto mb-3 opacity-50' />
-                <p>No products in this bundle</p>
-              </div>
-            )}
-          </div>
-
-          {/* Action Buttons */}
-          <div className='flex items-center justify-end space-x-4 pt-6 border-t'>
-            <Button variant='outline' onClick={onClose}>
-              Close
-            </Button>
-            <Button
-              onClick={() => onEdit(bundle)}
-              className='bg-blue-600 hover:bg-blue-700'
-            >
-              <Edit className='h-4 w-4 mr-2' />
-              Edit Bundle
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
+import {
+  BundleForm,
+  BundleViewDialog,
+  BundleCard,
+  useBundles,
+} from './bundles/index'
 
 const Bundles: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false)
-  const [bundleList, setBundleList] = useState<Bundle[]>([])
   const [selectedBundle, setSelectedBundle] = useState<Bundle | null>(null)
   const [isViewOpen, setIsViewOpen] = useState(false)
 
-  useEffect(() => {
-    const fetchBundles = async () => {
-      const data = await getBundles()
-      setBundleList(data)
-    }
-    fetchBundles()
-  }, [])
+  const {
+    bundles,
+    loading,
+    error,
+    isSaving,
+    createBundle,
+    updateBundle,
+    refreshBundles,
+  } = useBundles()
 
   const handleSaveBundle = async (data: BundleFormData) => {
-    if (selectedBundle) {
-      const updatedBundle = {
-        ...selectedBundle,
-        ...data,
-        budget: data.budget,
-        items: data.products.length,
+    try {
+      if (selectedBundle) {
+        await updateBundle(selectedBundle.id, data)
+      } else {
+        await createBundle(data)
       }
-      // 将 budget 转换为字符串以匹配 BundleFormData 接口
-      await updateBundle({
-        ...updatedBundle,
-      })
-    } else {
-      const newBundle = {
-        id: Date.now(),
-        name: data.name,
-        items: data.products.length,
-        assigned: false,
-        budget: data.budget || 0,
-        category: data.category as 'Drivers' | 'Office' | 'Special Bundles',
-        description: data.description,
-        products: data.products,
-        isActive: data.isActive,
-      }
-      // 将 budget 转换为字符串以匹配 BundleFormData 接口
-      await addBundle({
-        ...newBundle,
-      })
-    }
-    const bundles = await getBundles()
-    setBundleList(bundles)
-    setSelectedBundle(null)
-    setIsFormOpen(false)
-  }
-
-  const getCategoryColor = (category?: string) => {
-    switch (category) {
-      case 'Drivers':
-        return 'bg-blue-100 text-blue-800'
-      case 'Office':
-        return 'bg-purple-100 text-purple-800'
-      case 'Special Bundles':
-        return 'bg-orange-100 text-orange-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
+      setSelectedBundle(null)
+      setIsFormOpen(false)
+    } catch (error) {
+      console.error('Failed to save bundle:', error)
     }
   }
 
   const handleEdit = (bundle: Bundle) => {
     setSelectedBundle(bundle)
-    setIsViewOpen(false) // Close view dialog if open
+    setIsViewOpen(false)
     setIsFormOpen(true)
   }
 
   const handleView = (bundle: Bundle) => {
     setSelectedBundle(bundle)
-    setIsFormOpen(false) // Close form dialog if open
+    setIsFormOpen(false)
     setIsViewOpen(true)
   }
 
@@ -574,6 +66,27 @@ const Bundles: React.FC = () => {
     setSelectedBundle(null)
   }
 
+  if (loading) {
+    return (
+      <div className='flex items-center justify-center h-64'>
+        <Loader2 className='h-8 w-8 animate-spin' />
+        <span className='ml-2'>Loading bundles...</span>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className='flex items-center justify-center h-64 text-red-600'>
+        <AlertCircle className='h-8 w-8 mr-2' />
+        <span>Error loading bundles: {error}</span>
+        <Button onClick={refreshBundles} className='ml-4'>
+          Retry
+        </Button>
+      </div>
+    )
+  }
+
   return (
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
@@ -584,75 +97,32 @@ const Bundles: React.FC = () => {
         </Button>
       </div>
 
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-        {bundleList.map((bundle) => (
-          <Card
-            key={bundle.id}
-            className={`transition-all hover:shadow-md ${
-              bundle.assigned ? 'border-green-200 bg-green-50' : ''
-            }`}
-          >
-            <CardHeader>
-              <div className='flex items-center justify-between'>
-                <CardTitle className='text-lg'>{bundle.name}</CardTitle>
-                <div className='flex items-center space-x-2'>
-                  {bundle.category && (
-                    <Badge className={getCategoryColor(bundle.category)}>
-                      {bundle.category}
-                    </Badge>
-                  )}
-                  {bundle.assigned && (
-                    <Badge className='bg-green-100 text-green-800'>
-                      <CheckCircle className='h-3 w-3 mr-1' />
-                      Assigned
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className='space-y-3'>
-                <div className='flex items-center justify-between'>
-                  <span className='text-sm text-muted-foreground'>Items</span>
-                  <span className='font-medium'>{bundle.items}</span>
-                </div>
-                <div className='flex items-center justify-between'>
-                  <span className='text-sm text-muted-foreground'>Budget</span>
-                  <span className='font-medium'>
-                    ${bundle.budget.toFixed(2)}
-                  </span>
-                </div>
-                <div className='flex items-center justify-between'>
-                  <span className='text-sm text-muted-foreground'>Status</span>
-                  <Badge variant={bundle.isActive ? 'default' : 'secondary'}>
-                    {bundle.isActive ? 'Active' : 'Inactive'}
-                  </Badge>
-                </div>
-                <div className='flex items-center space-x-2 pt-2'>
-                  <Button
-                    size='sm'
-                    variant='outline'
-                    className='flex-1'
-                    onClick={() => handleView(bundle)}
-                  >
-                    <Eye className='h-4 w-4 mr-1' />
-                    View
-                  </Button>
-                  <Button
-                    size='sm'
-                    variant='outline'
-                    className='flex-1'
-                    onClick={() => handleEdit(bundle)}
-                  >
-                    <Edit className='h-4 w-4 mr-1' />
-                    Edit
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {bundles.length === 0 ? (
+        <div className='text-center py-12'>
+          <Package className='h-16 w-16 mx-auto mb-4 text-gray-400' />
+          <h3 className='text-lg font-medium text-gray-900 mb-2'>
+            No bundles found
+          </h3>
+          <p className='text-gray-500 mb-4'>
+            Create your first bundle to get started.
+          </p>
+          <Button onClick={handleCreateNew}>
+            <Plus className='h-4 w-4 mr-2' />
+            Create Bundle
+          </Button>
+        </div>
+      ) : (
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+          {bundles.map((bundle) => (
+            <BundleCard
+              key={bundle.id}
+              bundle={bundle}
+              onView={handleView}
+              onEdit={handleEdit}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Form Dialog */}
       <BundleForm
@@ -660,10 +130,11 @@ const Bundles: React.FC = () => {
         onClose={handleCloseForm}
         onSave={handleSaveBundle}
         bundle={selectedBundle}
+        isSaving={isSaving}
       />
 
       {/* View Dialog */}
-      <ViewBundleDialog
+      <BundleViewDialog
         bundle={isViewOpen ? selectedBundle : null}
         onClose={handleCloseView}
         onEdit={handleEdit}

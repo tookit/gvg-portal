@@ -15,53 +15,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { Plus, Eye, Edit, CheckCircle, X, Save, Package } from 'lucide-react'
 import type { Bundle, BundleFormData } from '@/types'
-
-// Mock API functions - replace with your actual API
-const getBundles = async () => {
-  // Mock data for demonstration
-  return [
-    {
-      id: 1,
-      name: 'Driver Safety Kit',
-      items: 5,
-      assigned: true,
-      budget: 150.0,
-      category: 'Drivers' as const,
-      description: 'Essential safety equipment for all drivers',
-      products: [
-        { id: '1', name: 'First Aid Kit', quantity: 1, price: 25.0 },
-        { id: '2', name: 'Emergency Flashlight', quantity: 1, price: 15.0 },
-        { id: '3', name: 'Reflective Vest', quantity: 2, price: 12.5 },
-        { id: '4', name: 'Road Flares', quantity: 4, price: 8.75 },
-      ],
-      isActive: true,
-    },
-    {
-      id: 2,
-      name: 'Office Starter Pack',
-      items: 8,
-      assigned: false,
-      budget: 200.0,
-      category: 'Office' as const,
-      description: 'Complete office setup for new employees',
-      products: [
-        { id: '5', name: 'Desk Organizer', quantity: 1, price: 20.0 },
-        { id: '6', name: 'Notebook Set', quantity: 3, price: 8.0 },
-        { id: '7', name: 'Pen Set', quantity: 2, price: 12.0 },
-        { id: '8', name: 'Desk Lamp', quantity: 1, price: 35.0 },
-      ],
-      isActive: true,
-    },
-  ]
-}
-
-const addBundle = async (bundle: BundleFormData) => {
-  return bundle
-}
-
-const updateBundle = async (bundle: BundleFormData) => {
-  return bundle
-}
+import { getBundles, addBundle, updateBundle } from '@/lib/api'
 
 const BundleForm: React.FC<{
   isOpen: boolean
@@ -73,7 +27,7 @@ const BundleForm: React.FC<{
     name: '',
     category: '',
     description: '',
-    budget: '',
+    budget: 0,
     products: [],
     isActive: true,
   })
@@ -84,7 +38,7 @@ const BundleForm: React.FC<{
         name: bundle.name,
         category: bundle.category || '',
         description: bundle.description || '',
-        budget: bundle.budget.toString(),
+        budget: bundle.budget,
         products: bundle.products || [],
         isActive: bundle.isActive ?? true,
       })
@@ -93,7 +47,7 @@ const BundleForm: React.FC<{
         name: '',
         category: '',
         description: '',
-        budget: '',
+        budget: 0,
         products: [],
         isActive: true,
       })
@@ -215,7 +169,10 @@ const BundleForm: React.FC<{
                 type='number'
                 value={formData.budget}
                 onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, budget: e.target.value }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    budget: parseFloat(e.target.value) || 0,
+                  }))
                 }
                 placeholder='0.00'
                 min='0'
@@ -343,19 +300,19 @@ const BundleForm: React.FC<{
                         <span>Total Cost:</span>
                         <span>${totalProductCost.toFixed(2)}</span>
                       </div>
-                      {formData.budget && parseFloat(formData.budget) > 0 && (
+                      {formData.budget && Number(formData.budget) > 0 && (
                         <div className='flex justify-between items-center text-sm text-muted-foreground'>
                           <span>Budget Remaining:</span>
                           <span
                             className={
-                              parseFloat(formData.budget) - totalProductCost < 0
+                              Number(formData.budget) - totalProductCost < 0
                                 ? 'text-red-600'
                                 : 'text-green-600'
                             }
                           >
                             $
                             {(
-                              parseFloat(formData.budget) - totalProductCost
+                              Number(formData.budget) - totalProductCost
                             ).toFixed(2)}
                           </span>
                         </div>
@@ -546,13 +503,12 @@ const Bundles: React.FC = () => {
       const updatedBundle = {
         ...selectedBundle,
         ...data,
-        budget: parseFloat(data.budget) || 0,
+        budget: data.budget,
         items: data.products.length,
       }
       // 将 budget 转换为字符串以匹配 BundleFormData 接口
       await updateBundle({
         ...updatedBundle,
-        budget: updatedBundle.budget.toString(),
       })
     } else {
       const newBundle = {
@@ -560,7 +516,7 @@ const Bundles: React.FC = () => {
         name: data.name,
         items: data.products.length,
         assigned: false,
-        budget: parseFloat(data.budget) || 0,
+        budget: data.budget || 0,
         category: data.category as 'Drivers' | 'Office' | 'Special Bundles',
         description: data.description,
         products: data.products,
@@ -569,7 +525,6 @@ const Bundles: React.FC = () => {
       // 将 budget 转换为字符串以匹配 BundleFormData 接口
       await addBundle({
         ...newBundle,
-        budget: newBundle.budget.toString(),
       })
     }
     const bundles = await getBundles()

@@ -48,7 +48,7 @@ export interface Bundle {
   items: number
   assigned: boolean
   budget: number
-  category?: 'Drivers' | 'Office' | 'Special Bundles'
+  category?: 'Drivers' | 'Office' | 'Special Bundles' | ''
   description?: string
   products?: Array<{
     id: string
@@ -63,7 +63,7 @@ export interface BundleFormData {
   name: string
   category: 'Drivers' | 'Office' | 'Special Bundles' | ''
   description: string
-  budget: string
+  budget: number
   products: Array<{
     id: string
     name: string
@@ -127,7 +127,12 @@ export interface BundleFormProps {
 }
 
 // Status types
-export type OrderStatus = 'pending' | 'approved' | 'rejected' | 'shipped' | 'delivered'
+export type OrderStatus =
+  | 'pending'
+  | 'approved'
+  | 'rejected'
+  | 'shipped'
+  | 'delivered'
 export type ProductStatus = 'pending' | 'approved' | 'rejected'
 export type UserStatus = 'Active' | 'Inactive'
 

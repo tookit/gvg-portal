@@ -10,22 +10,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  Search,
-  Download,
-  Plus,
-  Eye,
-  Edit,
-  ChevronDown,
-  Check,
-  X,
-} from 'lucide-react'
+import { Search, Download, Plus, Eye, Edit } from 'lucide-react'
 import { getOrders } from '@/lib/api'
+import { ChangeOrderStatusForm } from '@/components/ChangeOrderStatusForm'
+import { OrderDetails } from '@/components/OrderDetails'
 import type { Order } from '@/types'
 
 const Orders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([])
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [isStatusFormOpen, setIsStatusFormOpen] = useState(false)
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false)
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -54,14 +49,39 @@ const Orders: React.FC = () => {
 
   const handleStatusChange = (
     orderId: string,
-    newStatus: 'approved' | 'rejected'
+    data: { status: string; comments?: string }
   ) => {
     setOrders((prevOrders) =>
       prevOrders.map((order) =>
-        order.id === orderId ? { ...order, status: newStatus } : order
+        order.id === orderId
+          ? { ...order, status: data.status as Order['status'] }
+          : order
       )
     )
-    setOpenDropdown(null)
+    // Here you would typically also save the comments to your backend
+    console.log(
+      `Order ${orderId} status changed to ${data.status}. Comments: ${data.comments}`
+    )
+  }
+
+  const openStatusForm = (order: Order) => {
+    setSelectedOrder(order)
+    setIsStatusFormOpen(true)
+  }
+
+  const closeStatusForm = () => {
+    setSelectedOrder(null)
+    setIsStatusFormOpen(false)
+  }
+
+  const openOrderDetails = (order: Order) => {
+    setSelectedOrder(order)
+    setIsDetailsOpen(true)
+  }
+
+  const closeOrderDetails = () => {
+    setSelectedOrder(null)
+    setIsDetailsOpen(false)
   }
 
   return (
@@ -91,6 +111,7 @@ const Orders: React.FC = () => {
             <SelectItem value='approved'>Approved</SelectItem>
             <SelectItem value='rejected'>Rejected</SelectItem>
             <SelectItem value='shipped'>Shipped</SelectItem>
+            <SelectItem value='shipped'>Cancelled</SelectItem>
           </SelectContent>
         </Select>
         <Button variant='outline'>
@@ -127,53 +148,28 @@ const Orders: React.FC = () => {
                     <td className='p-4 font-medium'>${order.total}</td>
                     <td className='p-4'>
                       <div className='flex items-center space-x-2'>
-                        <Button size='sm' variant='outline'>
+                        <Button
+                          size='sm'
+                          variant='outline'
+                          onClick={() => openOrderDetails(order)}
+                        >
                           <Eye className='h-4 w-4' />
                         </Button>
-                        <Button size='sm' variant='outline'>
+
+                        <Button
+                          size='sm'
+                          variant='outline'
+                          onClick={() => openStatusForm(order)}
+                        >
                           <Edit className='h-4 w-4' />
                         </Button>
-
-                        {/* Approval Dropdown */}
-                        <div className='relative'>
-                          <Button
-                            size='sm'
-                            variant='outline'
-                            onClick={() =>
-                              setOpenDropdown(
-                                openDropdown === order.id ? null : order.id
-                              )
-                            }
-                          >
-                            Status
-                            <ChevronDown className='h-4 w-4 ml-1' />
-                          </Button>
-
-                          {openDropdown === order.id && (
-                            <div className='absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-10'>
-                              <div className='py-1'>
-                                <button
-                                  onClick={() =>
-                                    handleStatusChange(order.id, 'approved')
-                                  }
-                                  className='flex items-center w-full px-3 py-2 text-sm text-green-700 hover:bg-green-50 transition-colors'
-                                >
-                                  <Check className='h-4 w-4 mr-2' />
-                                  Approve
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    handleStatusChange(order.id, 'rejected')
-                                  }
-                                  className='flex items-center w-full px-3 py-2 text-sm text-red-700 hover:bg-red-50 transition-colors'
-                                >
-                                  <X className='h-4 w-4 mr-2' />
-                                  Reject
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
+                        {/* <Button
+                          size='sm'
+                          variant='outline'
+                          onClick={() => openStatusForm(order)}
+                        >
+                          <Settings className='h-4 w-4' />
+                        </Button> */}
                       </div>
                     </td>
                   </tr>
@@ -183,6 +179,21 @@ const Orders: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Change Order Status Form */}
+      <ChangeOrderStatusForm
+        isOpen={isStatusFormOpen}
+        onClose={closeStatusForm}
+        onSave={handleStatusChange}
+        order={selectedOrder}
+      />
+
+      {/* Order Details Modal */}
+      <OrderDetails
+        isOpen={isDetailsOpen}
+        onClose={closeOrderDetails}
+        order={selectedOrder}
+      />
     </div>
   )
 }

@@ -39,6 +39,8 @@ export interface Order {
   status: 'pending' | 'approved' | 'rejected' | 'shipped' | 'delivered'
   total: number
   items: number
+  customer: string
+  products: Product[]
 }
 
 // Bundle related types
@@ -133,6 +135,7 @@ export type OrderStatus =
   | 'rejected'
   | 'shipped'
   | 'delivered'
+  | 'cancelled'
 export type ProductStatus = 'pending' | 'approved' | 'rejected'
 export type UserStatus = 'Active' | 'Inactive'
 

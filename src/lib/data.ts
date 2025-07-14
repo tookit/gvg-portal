@@ -153,4 +153,5 @@ export const bundles: Bundle[] = [
     assigned: false,
     budget: 450,
   },
+  
 ]

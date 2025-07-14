@@ -10,6 +10,7 @@ import {
   Package,
   FileText,
   UsersIcon,
+  Info,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useCart } from '@/contexts/CartContext'
@@ -101,6 +102,20 @@ const Layout: React.FC<LayoutProps> = ({ user }) => {
           </div>
         </div>
       </nav>
+
+      {/* Alert Banner */}
+      <div className='bg-blue-50 border-b border-blue-200'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className='flex items-center justify-center py-3'>
+            <div className='flex items-center space-x-2 text-blue-800'>
+              <Info className='h-4 w-4' />
+              <span className='text-sm font-medium'>
+                Note: This is a demonstration prototype. Actual functionality is under development.
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Main Content */}
       <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
